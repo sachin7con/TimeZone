@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>SGN TimeZone</title>
+    <style>
+    h1{
+      margin: 20px;
+    }
+      #res {
+        display: none;
+        background-color: black;
+        color: white;
+        margin:20px;
+        padding: 15px;
+      }
+      div{
+        background-color: white;
+        color: black;
+
+      }
+      #rectangle{
+        border: 1px solid black;
+        margin: 20px;
+        padding: 15px;
+      }
+      body{
+        background-color: black;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- SGN -->
+    <div>  <h1>Time Zone API</h1><h1>Your Current Time Zone</h1>
+    <div id="rectangle">
+    <p>Name of Time Zone: </p>
+    <p>Lat:  <span id="long">Long: </span> </p>
+    <p>Offset STD: </p>
+    <p>Offset STD seconds: </p>
+    <p>Offset DST: </p>
+    <p>Offset DST seconds: </p>
+    <p>Country: </p>
+    <p>Postcode: </p>
+    <p>city: </p>
+    </div>
+    </div>
+    <input id="address" placeholder="Address"/> <br><br>
+    <button type="submit" id="submit" value="submit">Submit</button>
+    <p id="er"></p>
+
+
+    <div id="res">
+    <h1>Your Result</h1>
+    <p id="tzName">Name of Time Zone: </p>
+    <p id="tzLat">Lat:  <span id="tzLon">Long: </span> </p>
+    <p id="offStd">Offset STD: </p>
+    <p id="offStdSec">Offset STD seconds: </p>
+    <p id="offDst">Offset DST: </p>
+    <p id="offDstSec">Offset DST seconds: </p>
+    <p id="country">Country: </p>
+    <p id="postCode">Postcode: </p>
+    <p id="city">city: </p>
+    </div>
+
+
+
+
+
+
+    <script>
+      //grabing elements
+      const sbmt = document.getElementById("submit");
+      const err = document.getElementById("er");
+
+
+      // Fetching coordinates
+      function Coordinat(){
+        const adr = document.getElementById("address").value;
+
+
+        const tzName = document.getElementById("tzName");
+        const tzLat = document.getElementById("tzLat");
+        const tzLon = document.getElementById("tzLon");
+        const offStd = document.getElementById("offStd");
+        const offStdSec = document.getElementById("offStdSec");
+        const offDst = document.getElementById("offDst");
+        const offDstSec = document.getElementById("offDstSec");
+        const country = document.getElementById("country");
+        const postCode = document.getElementById("postCode");
+        const city = document.getElementById("city");
+        return new Promise((resolve, reject) => {
+          fetch(`https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(adr)}&apiKey=5ad5419dc1344e338ce199ad14a7bb98`)
+          .then(response => response.json())
+            .then((data) =>{
+              if(data.features.length > 0) {
+                const features = data.features[0];
+                const {lat, lon} = features.properties;
+                const timezone = features.properties.timezone;
+                  tzName.innerHTML = "Name of Time Zone: " + timezone.name;
+                  tzLat.innerHTML = "Lat: " + lat + "            " + "Long: " + lon;
+
+                  offStd.innerHTML = "Offset STD: " + timezone.offset_STD;
+                  offStdSec.innerHTML = "Offset STD seconds: " + timezone.offset_STD_seconds;
+                  offDst.innerHTML = "Offset DST: " + timezone.offset_DST;
+                  offDstSec.innerHTML = "Offset DST seconds: " + timezone.offset_DST_seconds;
+                  country.innerHTML = "Country: " + features.properties.country;
+                  postCode.innerHTML = "Postcode: " + features.properties.postcode;
+                  city.innerHTML = "City: " + features.properties.city;
+                  resolve();
+              }else {
+                reject(new Error('No timezone found'));
+              }
+            }).catch((error) =>{
+              err.textContent = error.message;
+              reject(error);
+            });
+
+        });
+
+
+
+      };
+
+
+
+
+
+
+      // submit event listener
+      sbmt.addEventListener('click', () => {
+        const adr = document.getElementById("address").value;
+        const result = document.getElementById("res");
+
+
+        if(adr.length >0){
+            result.style.display = "block";
+            err.style.display = "none";
+            Coordinat();
+        }else{
+
+          err.textContent = "Please enter an address!";
+          err.style.color = "red";
+          err.style.display = "block";
+        }
+      })
+
+
+
+
+    </script>
+  </body>
+</html>
